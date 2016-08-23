@@ -6,7 +6,8 @@ A utility library for [Xee API](https://dev.xee.com) with Python 3.
 
 ## Install
 
-`pip install xee`
+* TODO: `pip install xee`
+* CURRENT: Clone and setup install :) 
 
 ## Initializing the SDK
 
