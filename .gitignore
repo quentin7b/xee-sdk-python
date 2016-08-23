@@ -1,0 +1,10 @@
+.DS_Store
+.idea/
+**.html
+**.pyc
+**.iml
+**.coverage
+htmlcov/
+xee.egg-info/
+dist/
+build/
