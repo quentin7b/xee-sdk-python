@@ -163,7 +163,7 @@ def parse_user(user):
             user['id'],
             user['lastName'],
             user['firstName'],
-            user['nickname'],
+            user['nickName'],
             user['gender'],
             isodate.parse_datetime(user['birthDate']),
             isodate.parse_datetime(user['licenceDeliveryDate']),
