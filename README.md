@@ -34,7 +34,7 @@ login_url = xee.get_authentication_url()
 #### Getting a [token from an `authorization_code`](https://github.com/xee-lab/xee-api-docs/tree/master/api/api/v3/auth/access_token.md)
 
 ```python
-token = xee.get_token_from_code(authorization_code)
+token , error = xee.get_token_from_code(authorization_code)
 ```
 
 ### Requests
@@ -42,7 +42,7 @@ token = xee.get_token_from_code(authorization_code)
 As simple as
 
 ```python
-user = xee.get_user(token.access_token)
+user , error = xee.get_user(token.access_token)
 print(user.id)
 ```
 
