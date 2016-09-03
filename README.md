@@ -42,7 +42,7 @@ token = xee.get_token_from_code(authorization_code)
 As simple as
 
 ```python
-user = xee.get_user(token)
+user = xee.get_user(token.access_token)
 print(user.id)
 ```
 
