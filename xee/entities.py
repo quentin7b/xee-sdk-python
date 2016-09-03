@@ -26,7 +26,7 @@ User = collections.namedtuple(
         'nick_name',
         'gender',
         'birth_date',
-        'licence_delivery_date',
+        'license_delivery_date',
         'role',
         'is_location_enabled'
     ])
@@ -158,6 +158,12 @@ def parse_user(user):
         If the dict does not contains the correct data.
 
     """
+    birth_date = None
+    if user['birthDate']:
+        birth_date = isodate.parse_datetime(user['birthDate'])
+    license_delivery_date = None
+    if user['licenseDeliveryDate']:
+        license_delivery_date = isodate.parse_datetime(user['license_delivery_date'])
     try:
         return User(
             user['id'],
@@ -165,8 +171,8 @@ def parse_user(user):
             user['firstName'],
             user['nickName'],
             user['gender'],
-            isodate.parse_datetime(user['birthDate']),
-            isodate.parse_datetime(user['licenseDeliveryDate']),
+            birth_date,
+            license_delivery_date,
             user['role'],
             user['isLocationEnabled']
         )
