@@ -4,10 +4,13 @@ A utility library for [Xee API](https://dev.xee.com) with Python 3.
 
 > Almost all the requests are done for you and the responses are returned as a **tuple**s.
 
+## Version
+
+Current version is [3.0.1](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.1)
+
 ## Install
 
-* TODO: `pip install xee`
-* CURRENT: Clone and setup install :) 
+* Clone and `python setup.py install` :) 
 
 ## Initializing the SDK
 
