@@ -303,11 +303,21 @@ def parse_status(status):
 
     """
     try:
-        accelerometer = status['accelerometer']
+        accelerometer = None
+        if 'accelerometer' in status:
+            accelerometer_dict = status['accelerometer']
+            if accelerometer_dict:
+                accelerometer = Accelerometer(accelerometer_dict['x'], accelerometer_dict['y'],
+                                              accelerometer_dict['z'],
+                                              isodate.parse_datetime(accelerometer_dict['date']))
+        location = None
+        if 'location' in status:
+            location_dict = status['location']
+            if location_dict:
+                location = parse_location(location_dict)
         return Status(
-            parse_location(status['location']),
-            Accelerometer(accelerometer['x'], accelerometer['y'], accelerometer['z'],
-                          isodate.parse_datetime(accelerometer['date'])),
+            location,
+            accelerometer,
             [parse_signal(signal) for signal in status['signals']]
         )
     except ValueError as err:
