@@ -26,7 +26,7 @@ User = collections.namedtuple(
         'nick_name',
         'gender',
         'birth_date',
-        'license_delivery_date',
+        'licence_delivery_date',
         'role',
         'is_location_enabled'
     ])
@@ -90,8 +90,7 @@ UsedTimeStat = collections.namedtuple(
         'end_date',
         'type',
         'value'
-    ]
-)
+    ])
 MileageStat = collections.namedtuple(
     'MileageStat',
     [
@@ -99,8 +98,13 @@ MileageStat = collections.namedtuple(
         'end_date',
         'type',
         'value'
-    ]
-)
+    ])
+TripStat = collections.namedtuple(
+    'TripStat',
+    [
+        'type',
+        'value'
+    ])
 
 
 # Parsers
@@ -161,9 +165,9 @@ def parse_user(user):
     birth_date = None
     if user['birthDate']:
         birth_date = isodate.parse_datetime(user['birthDate'])
-    license_delivery_date = None
+    licence_delivery_date = None
     if user['licenseDeliveryDate']:
-        license_delivery_date = isodate.parse_datetime(user['license_delivery_date'])
+        licence_delivery_date = isodate.parse_datetime(user['licenseDeliveryDate'])
     try:
         return User(
             user['id'],
@@ -172,7 +176,7 @@ def parse_user(user):
             user['nickName'],
             user['gender'],
             birth_date,
-            license_delivery_date,
+            licence_delivery_date,
             user['role'],
             user['isLocationEnabled']
         )
@@ -303,11 +307,21 @@ def parse_status(status):
 
     """
     try:
-        accelerometer = status['accelerometer']
+        accelerometer = None
+        if 'accelerometer' in status:
+            accelerometer_dict = status['accelerometer']
+            if accelerometer_dict:
+                accelerometer = Accelerometer(accelerometer_dict['x'], accelerometer_dict['y'],
+                                              accelerometer_dict['z'],
+                                              isodate.parse_datetime(accelerometer_dict['date']))
+        location = None
+        if 'location' in status:
+            location_dict = status['location']
+            if location_dict:
+                location = parse_location(location_dict)
         return Status(
-            parse_location(status['location']),
-            Accelerometer(accelerometer['x'], accelerometer['y'], accelerometer['z'],
-                          isodate.parse_datetime(accelerometer['date'])),
+            location,
+            accelerometer,
             [parse_signal(signal) for signal in status['signals']]
         )
     except ValueError as err:
@@ -390,7 +404,7 @@ def parse_trip(trip):
     Returns
     -------
     tuple
-        A namedtuple containing trip stat info.
+        A namedtuple containing trip info.
         The error is None if everything went fine.
 
     Raises
@@ -406,6 +420,36 @@ def parse_trip(trip):
             parse_location(trip['endLocation']),
             isodate.parse_datetime(trip['beginDate']),
             isodate.parse_datetime(trip['endDate'])
+        )
+    except ValueError as err:
+        raise xee_exceptions.ParseException(err)
+
+
+def parse_trip_stat(trip_stat):
+    """
+    Parse a trip stat from a a dict representation.
+
+    Parameters
+    ----------
+    trip_stat  : dict
+                 The trip stat as a dict.
+
+    Returns
+    -------
+    tuple
+        A namedtuple containing trip stat info.
+        The error is None if everything went fine.
+
+    Raises
+    ------
+    ValueError
+        If the dict does not contains the correct data.
+
+    """
+    try:
+        return TripStat(
+            trip_stat['type'],
+            trip_stat['value']
         )
     except ValueError as err:
         raise xee_exceptions.ParseException(err)

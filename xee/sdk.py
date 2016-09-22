@@ -2,7 +2,10 @@
 # coding: utf8
 """This script contains the Xee python SDK"""
 
-import urllib.parse
+try:
+    import urllib.parse as url_parser
+except ImportError:
+    import urllib as url_parser
 
 import isodate
 import requests
@@ -57,9 +60,9 @@ class Xee(object):
         """
         route = '{host}/auth/auth'.format(host=self.host)
         if state is None:
-            query_params = urllib.parse.urlencode({'client_id': self.client_id})
+            query_params = url_parser.urlencode({'client_id': self.client_id})
         else:
-            query_params = urllib.parse.urlencode({'client_id': self.client_id, 'state': state})
+            query_params = url_parser.urlencode({'client_id': self.client_id, 'state': state})
         return '{route}?{params}'.format(route=route, params=query_params)
 
     def get_token_from_code(self, code):
@@ -257,7 +260,7 @@ class Xee(object):
         if options.get('names', None) is not None:
             params['name'] = ','.join(options['names'])
         if bool(params):
-            route = '?'.join([route, urllib.parse.urlencode(params)])
+            route = '?'.join([route, url_parser.urlencode(params)])
         try:
             response = xee_utils.do_get_request(route, access_token)
             return [xee_entities.parse_signal(signal) for signal in response], None
@@ -303,7 +306,7 @@ class Xee(object):
         if options.get('end', None) is not None:
             params['end'] = isodate.datetime_isoformat(options['end'])
         if bool(params):
-            route = '?'.join([route, urllib.parse.urlencode(params)])
+            route = '?'.join([route, url_parser.urlencode(params)])
         try:
             response = xee_utils.do_get_request(route, access_token)
             return [xee_entities.parse_location(location) for location in response], None
@@ -344,7 +347,7 @@ class Xee(object):
         if end is not None:
             params['end'] = isodate.datetime_isoformat(end)
         if bool(params):
-            route = '?'.join([route, urllib.parse.urlencode(params)])
+            route = '?'.join([route, url_parser.urlencode(params)])
         try:
             response = xee_utils.do_get_request(route, access_token)
             return [xee_entities.parse_trip(trip) for trip in response], None
@@ -390,7 +393,7 @@ class Xee(object):
         if options.get('initial_value', None) is not None:
             params['initialValue'] = int(options.get('initial_value'))
         if bool(params):
-            route = '?'.join([route, urllib.parse.urlencode(params)])
+            route = '?'.join([route, url_parser.urlencode(params)])
         try:
             response = xee_utils.do_get_request(route, access_token)
             return xee_entities.parse_used_time(response), None
@@ -433,7 +436,7 @@ class Xee(object):
         if options.get('initial_value', None) is not None:
             params['initialValue'] = float(options.get('initial_value'))
         if bool(params):
-            route = '?'.join([route, urllib.parse.urlencode(params)])
+            route = '?'.join([route, url_parser.urlencode(params)])
         try:
             response = xee_utils.do_get_request(route, access_token)
             return xee_entities.parse_mileage(response), None
@@ -492,7 +495,7 @@ class Xee(object):
         if names is not None:
             params['name'] = ','.join(names)
         if bool(params):
-            route = '{route}?{params}'.format(route=route, params=urllib.parse.urlencode(params))
+            route = '{route}?{params}'.format(route=route, params=url_parser.urlencode(params))
         try:
             response = xee_utils.do_get_request(route, access_token)
             signals = [xee_entities.parse_signal(signal) for signal in response]
@@ -529,5 +532,86 @@ class Xee(object):
         except ValueError:
             # Happens when the locations list is empty
             return [], None
+        except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
+            return None, err
+
+    def get_trip_stats(self, trip_id, access_token):
+        """
+        Fetch a list of stats for a specific trip.
+
+        Parameters
+        ----------
+        trip_id         :   str
+                            the id of the trip you are looking for the stats.
+        access_token    :   str
+                            the access token of the user.
+
+        Returns
+        -------
+        tuple
+            A tuple containing [TripStat], Error.
+            The error is None if everything went fine.
+
+        """
+        route = '{host}/trips/{trip_id}/stats'.format(host=self.host, trip_id=trip_id)
+        try:
+            response = xee_utils.do_get_request(route, access_token)
+            stats = [xee_entities.parse_trip_stat(stat) for stat in response]
+            return stats, None
+        except ValueError:
+            # Happens when the stats list is empty
+            return [], None
+        except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
+            return None, err
+
+    def get_trip_mileage(self, trip_id, access_token):
+        """
+        Fetch trip mileage stat.
+
+        Parameters
+        ----------
+        trip_id         :   str
+                            the id of the trip you are looking for the mileage.
+        access_token    :   str
+                            the access token of the user.
+
+        Returns
+        -------
+        tuple
+            A tuple containing TripStat, Error.
+            The error is None if everything went fine.
+
+        """
+        route = '{host}/trips/{trip_id}/stats/mileage'.format(host=self.host, trip_id=trip_id)
+        try:
+            response = xee_utils.do_get_request(route, access_token)
+            mileage = xee_entities.parse_trip_stat(response)
+            return mileage, None
+        except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
+            return None, err
+
+    def get_trip_duration(self, trip_id, access_token):
+        """
+        Fetch trip duration stat.
+
+        Parameters
+        ----------
+        trip_id         :   str
+                            the id of the trip you are looking for the duration.
+        access_token    :   str
+                            the access token of the user.
+
+        Returns
+        -------
+        tuple
+            A tuple containing TripStat, Error.
+            The error is None if everything went fine.
+
+        """
+        route = '{host}/trips/{trip_id}/stats/usedtime'.format(host=self.host, trip_id=trip_id)
+        try:
+            response = xee_utils.do_get_request(route, access_token)
+            used_time = xee_entities.parse_trip_stat(response)
+            return used_time, None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err

@@ -37,33 +37,38 @@ login_url = xee.get_authentication_url()
 #### Getting a [token from an `authorization_code`](https://github.com/xee-lab/xee-api-docs/tree/master/api/api/v3/auth/access_token.md)
 
 ```python
-token , error = xee.get_token_from_code(authorization_code)
+token, error = xee.get_token_from_code(authorization_code)
 ```
 
 #### Getting a [token from an `refresh_token`](https://github.com/xee-lab/xee-api-docs/tree/master/api/api/v3/auth/access_token.md)
 
 ```python
-token , error = xee.get_token_from_refresh_token(token.refresh_token)
+token, error = xee.get_token_from_refresh_token(token.refresh_token)
 ```
 ### Requests
 
 As simple as
 
 ```python
-user , error = xee.get_user(token.access_token)
+user, error = xee.get_user(token.access_token)
 print(user.id)
 ```
 
 Others examples:
 
 ```python
-status , error = xee.get_status(carId,token.access_token)
+status, error = xee.get_status(carId, token.access_token)
 print(status)
 ```
 
 ```python
-signal , error = xee.get_signals(carId,token.access_token,names=['Odometer', 'FuelLevel'])
+signal, error = xee.get_signals(carId, token.access_token,names=['Odometer', 'FuelLevel'])
 print(signal)
+```
+
+```python
+trip_duration, error = xee.get_trip_duration(tripId, token.access_token)
+print(trip_duration.value)
 ```
 
 See the [docs](https://github.com/quentin7b/xee-sdk-python/docs) for more about how to use it
