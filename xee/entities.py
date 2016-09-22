@@ -90,8 +90,7 @@ UsedTimeStat = collections.namedtuple(
         'end_date',
         'type',
         'value'
-    ]
-)
+    ])
 MileageStat = collections.namedtuple(
     'MileageStat',
     [
@@ -99,8 +98,13 @@ MileageStat = collections.namedtuple(
         'end_date',
         'type',
         'value'
-    ]
-)
+    ])
+TripStat = collections.namedtuple(
+    'TripStat',
+    [
+        'type',
+        'value'
+    ])
 
 
 # Parsers
@@ -400,7 +404,7 @@ def parse_trip(trip):
     Returns
     -------
     tuple
-        A namedtuple containing trip stat info.
+        A namedtuple containing trip info.
         The error is None if everything went fine.
 
     Raises
@@ -416,6 +420,36 @@ def parse_trip(trip):
             parse_location(trip['endLocation']),
             isodate.parse_datetime(trip['beginDate']),
             isodate.parse_datetime(trip['endDate'])
+        )
+    except ValueError as err:
+        raise xee_exceptions.ParseException(err)
+
+
+def parse_trip_stat(trip_stat):
+    """
+    Parse a trip stat from a a dict representation.
+
+    Parameters
+    ----------
+    trip_stat  : dict
+                 The trip stat as a dict.
+
+    Returns
+    -------
+    tuple
+        A namedtuple containing trip stat info.
+        The error is None if everything went fine.
+
+    Raises
+    ------
+    ValueError
+        If the dict does not contains the correct data.
+
+    """
+    try:
+        return TripStat(
+            trip_stat['type'],
+            trip_stat['value']
         )
     except ValueError as err:
         raise xee_exceptions.ParseException(err)
