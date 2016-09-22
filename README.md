@@ -1,12 +1,12 @@
 #  Xee SDK Python
 
+[![Build Status](https://travis-ci.org/quentin7b/xee-sdk-python.svg?branch=master)](https://travis-ci.org/quentin7b/xee-sdk-python)
+[![License Apache](./LICENSE)](https://img.shields.io/badge/License-Apache%202.0-green.svg)
+[![Version](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.2)](https://img.shields.io/badge/Version-3.0.2-blue.svg)
+
 A utility library for [Xee API](https://dev.xee.com) with Python 3.
 
 > Almost all the requests are done for you and the responses are returned as a **tuple**s.
-
-## Version
-
-Current version is [3.0.1](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.1)
 
 ## Install
 
