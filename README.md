@@ -1,8 +1,8 @@
 #  Xee SDK Python
 
 [![Build Status](https://travis-ci.org/quentin7b/xee-sdk-python.svg?branch=master)](https://travis-ci.org/quentin7b/xee-sdk-python)
-[![License Apache](./LICENSE)](https://img.shields.io/badge/License-Apache%202.0-green.svg)
-[![Version](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.2)](https://img.shields.io/badge/Version-3.0.2-blue.svg)
+[![License Apache](https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat)](./LICENSE)
+[![Version](https://img.shields.io/badge/Version-3.0.2-blue.svg?style=flat)](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.2)
 
 A utility library for [Xee API](https://dev.xee.com) with Python 3.
 
