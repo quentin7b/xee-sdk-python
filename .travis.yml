@@ -5,6 +5,6 @@ python:
 # command to install dependencies
 install: make install
 # command to run tests
-script: make coverage
+script: make coverage_ci
 # code coverage
 after_success: codecov
