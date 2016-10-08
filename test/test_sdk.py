@@ -194,6 +194,26 @@ class TestCars(unittest.TestCase):
         self.assertListEqual(cars, expected)
 
     @responses.activate
+    def test_get_cars_scope_403(self):
+        responses.add(responses.GET, host + "/users/me/cars",
+                      json=
+                      [
+                          {
+                              'type': 'AUTHORIZATION_ERROR',
+                              'message': "Token does not have the required scope",
+                              'tip': "Add the cars_read scope to your app scopes and reconnect the user"
+                          }
+                      ],
+                      status=403)
+        cars, err = xee.get_cars("oops")
+        self.assertIsNone(cars)
+        self.assertEqual(err, APIException(
+            'AUTHORIZATION_ERROR',
+            "Token does not have the required scope",
+            "Add the cars_read scope to your app scopes and reconnect the user"))
+
+class TestCar(unittest.TestCase):
+    @responses.activate
     def test_get_car(self):
         # Mock https://github.com/xee-lab/xee-api-docs/blob/master/api/api/v3/cars/car_id.md
         responses.add(responses.GET, host + "/cars/1337",
@@ -221,8 +241,8 @@ class TestCars(unittest.TestCase):
         self.assertEqual(car.cardb_id, 210)
 
     @responses.activate
-    def test_get_cars_scope_403(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_scope_403(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
@@ -232,51 +252,50 @@ class TestCars(unittest.TestCase):
                           }
                       ],
                       status=403)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'AUTHORIZATION_ERROR',
             "Token does not have the required scope",
             "Add the cars_read scope to your app scopes and reconnect the user"))
 
     @responses.activate
-    def test_get_cars_access_403(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_token_403(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
                               'type': 'AUTHORIZATION_ERROR',
-                              'message': "Token can't access this user",
-                              'tip': "Make sure the trip belongs to the user you asked for"
+                              'message': "Token can't access this car",
+                              'tip': "Make sure the token belongs to the user owning the car you're asking for"
                           }
                       ],
                       status=403)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'AUTHORIZATION_ERROR',
-            "Token can't access this user",
-            "Make sure the trip belongs to the user you asked for"))
-
+            "Token can't access this car",
+            "Make sure the token belongs to the user owning the car you're asking for"))
+    
     @responses.activate
-    def test_get_cars_404(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_404(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
                               'type': 'PARAMETERS_ERROR',
-                              'message': "User not found",
-                              'tip': "Please check that the user exists, looks like it does not"
+                              'message': "Car not found",
+                              'tip': "Please check that the car exists, looks like it does not"
                           }
                       ],
                       status=404)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'PARAMETERS_ERROR',
-            "User not found",
-            "Please check that the user exists, looks like it does not"))
-
+            "Car not found",
+            "Please check that the car exists, looks like it does not"))
 
 class TestStats(unittest.TestCase):
     @responses.activate
