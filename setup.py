@@ -5,7 +5,7 @@ from setuptools import setup, find_packages
 
 setup(
     name='xee',
-    version='3.0.2',
+    version='3.0.3-SNAPSHOT',
     packages=find_packages(),
     author='quentin7b',
     description='SDK for Xee APIs (https://dev.xee.com)',
