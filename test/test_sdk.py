@@ -2,6 +2,11 @@
 # coding: utf8
 import unittest
 
+try:
+    import urllib.parse as url_parser
+except ImportError:
+    import urlparse as url_parser
+
 import responses
 import pytz
 
@@ -12,6 +17,23 @@ from datetime import datetime
 xee = Xee('toto', 'tata', 'tut')
 host = xee.host
 compat_host = xee.compat_host
+
+class TestAuth(unittest.TestCase):
+    @responses.activate
+    def test_authentication_url(self):
+        url = xee.get_authentication_url()
+        self.assertEqual(url, 'https://cloud.xee.com/v3/auth/auth?client_id=toto')
+
+    @responses.activate
+    def test_authentication_url_with_state(self):
+        url = xee.get_authentication_url(state = '123')
+        test_url = url_parser.urlparse(url)
+        self.assertEqual(test_url.scheme, 'https')
+        self.assertEqual(test_url.netloc, 'cloud.xee.com')
+        self.assertEqual(test_url.path, '/v3/auth/auth')
+        query_params = dict(url_parser.parse_qs(test_url.query))
+        self.assertEqual(query_params['client_id'], ['toto'])
+        self.assertEqual(query_params['state'], ['123'])
 
 
 class TestAuthFromAuthorizationCode(unittest.TestCase):
@@ -32,6 +54,19 @@ class TestAuthFromAuthorizationCode(unittest.TestCase):
                          '22fe0c13e995da4a44a63a7ff549badb5d337a42bf80f17424482e35d4cca91a')
         self.assertEqual(token.refresh_token,
                          '8eb667707535655f2d9e14fc6491a59f6e06f2e73170761259907d8de186b6a1')
+    
+    @responses.activate
+    def test_token_invalid_authentication(self):
+        responses.add(responses.POST, host + "/auth/access_token",
+                      json={
+                          "message": "Invalid authentication"
+                      },
+                      status=403)
+        token, err = xee.get_token_from_code("fake_code")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'AUTHENTICATION_ERROR')
+        self.assertEqual(err.message, 'Invalid authentication')
+        self.assertEqual(err.tip, 'Check your Xee credentials')
 
 
 class TestAuthFromRefreshToken(unittest.TestCase):
@@ -53,6 +88,18 @@ class TestAuthFromRefreshToken(unittest.TestCase):
         self.assertEqual(token.refresh_token,
                          '8eb667707535655f2d9e14fc6491a59f6e06f2e73170761259907d8de186b6a1')
 
+    @responses.activate
+    def test_token_invalid_authentication(self):
+        responses.add(responses.POST, host + "/auth/access_token",
+                      json={
+                          "message": "Invalid authentication"
+                      },
+                      status=403)
+        token, err = xee.get_token_from_refresh_token("fake_refresh_token")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'AUTHENTICATION_ERROR')
+        self.assertEqual(err.message, 'Invalid authentication')
+        self.assertEqual(err.tip, 'Check your Xee credentials')
 
 class TestUser(unittest.TestCase):
     @responses.activate
@@ -718,20 +765,3 @@ class TestCarCompat(unittest.TestCase):
         self.assertEqual(err.message, "CarDb not found")
         self.assertEqual(err.tip, "The carDb associated with KType doesn't exist. Please try with an other KType.")
 
-
-class TestErrors(unittest.TestCase):
-    @responses.activate
-    def test_400(self):
-        return
-
-    def test_401(self):
-        return
-
-    def test_403(self):
-        return
-
-    def test_404(self):
-        return
-
-    def test_416(self):
-        return

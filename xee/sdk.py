@@ -85,11 +85,15 @@ class Xee(object):
         route = '{host}/auth/access_token'.format(host=self.host)
         payload = {'grant_type': 'authorization_code', 'code': code}
         request = requests.post(route, data=payload, auth=(self.client_id, self.client_secret))
+        response = request.json()
         if request.status_code == 200:
-            response = request.json()
             return xee_entities.parse_token(response), None
         else:
-            return None, Exception(request.text)
+            return None, xee_exceptions.APIException(
+                    'AUTHENTICATION_ERROR', 
+                    response['message'],
+                    "Check your Xee credentials"
+                )
 
     def get_token_from_refresh_token(self, refresh_token):
         """
@@ -110,11 +114,15 @@ class Xee(object):
         route = '{host}/auth/access_token'.format(host=self.host)
         payload = {'grant_type': 'refresh_token', 'refresh_token': refresh_token}
         request = requests.post(route, data=payload, auth=(self.client_id, self.client_secret))
+        response = request.json()
         if request.status_code == 200:
-            response = request.json()
             return xee_entities.parse_token(response), None
         else:
-            return None, Exception(request.text)
+            return None, xee_exceptions.APIException(
+                    'AUTHENTICATION_ERROR', 
+                    response['message'],
+                    "Check your Xee credentials"
+                )
 
     def get_user(self, access_token):
         """
