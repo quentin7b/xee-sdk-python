@@ -4,6 +4,7 @@
 **.pyc
 **.iml
 **.coverage
+coverage.xml
 htmlcov/
 xee.egg-info/
 dist/
