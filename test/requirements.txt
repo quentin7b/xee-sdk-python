@@ -1,3 +1,4 @@
 responses
 pytz
 isodate
+codecov

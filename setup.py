@@ -3,11 +3,9 @@
 
 from setuptools import setup, find_packages
 
-exec(open("xee/version.py").read())
-
 setup(
     name='xee',
-    version=__version__,
+    version='3.0.3-SNAPSHOT',
     packages=find_packages(),
     author='quentin7b',
     description='SDK for Xee APIs (https://dev.xee.com)',

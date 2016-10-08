@@ -1,6 +1,7 @@
 #  Xee SDK Python
 
 [![Build Status](https://travis-ci.org/quentin7b/xee-sdk-python.svg?branch=master)](https://travis-ci.org/quentin7b/xee-sdk-python)
+[![codecov](https://codecov.io/gh/quentin7b/xee-sdk-python/branch/master/graph/badge.svg)](https://codecov.io/gh/quentin7b/xee-sdk-python)
 [![License Apache](https://img.shields.io/badge/License-Apache%202.0-green.svg?style=flat)](./LICENSE)
 [![Version](https://img.shields.io/badge/Version-3.0.2-blue.svg?style=flat)](https://github.com/quentin7b/xee-sdk-python/releases/tag/3.0.2)
 

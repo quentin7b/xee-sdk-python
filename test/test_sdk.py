@@ -2,6 +2,11 @@
 # coding: utf8
 import unittest
 
+try:
+    import urllib.parse as url_parser
+except ImportError:
+    import urlparse as url_parser
+
 import responses
 import pytz
 
@@ -12,6 +17,23 @@ from datetime import datetime
 xee = Xee('toto', 'tata', 'tut')
 host = xee.host
 compat_host = xee.compat_host
+
+class TestAuth(unittest.TestCase):
+    @responses.activate
+    def test_authentication_url(self):
+        url = xee.get_authentication_url()
+        self.assertEqual(url, 'https://cloud.xee.com/v3/auth/auth?client_id=toto')
+
+    @responses.activate
+    def test_authentication_url_with_state(self):
+        url = xee.get_authentication_url(state = '123')
+        test_url = url_parser.urlparse(url)
+        self.assertEqual(test_url.scheme, 'https')
+        self.assertEqual(test_url.netloc, 'cloud.xee.com')
+        self.assertEqual(test_url.path, '/v3/auth/auth')
+        query_params = dict(url_parser.parse_qs(test_url.query))
+        self.assertEqual(query_params['client_id'], ['toto'])
+        self.assertEqual(query_params['state'], ['123'])
 
 
 class TestAuthFromAuthorizationCode(unittest.TestCase):
@@ -32,6 +54,19 @@ class TestAuthFromAuthorizationCode(unittest.TestCase):
                          '22fe0c13e995da4a44a63a7ff549badb5d337a42bf80f17424482e35d4cca91a')
         self.assertEqual(token.refresh_token,
                          '8eb667707535655f2d9e14fc6491a59f6e06f2e73170761259907d8de186b6a1')
+    
+    @responses.activate
+    def test_token_invalid_authentication(self):
+        responses.add(responses.POST, host + "/auth/access_token",
+                      json={
+                          "message": "Invalid authentication"
+                      },
+                      status=403)
+        token, err = xee.get_token_from_code("fake_code")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'AUTHENTICATION_ERROR')
+        self.assertEqual(err.message, 'Invalid authentication')
+        self.assertEqual(err.tip, 'Check your Xee credentials')
 
 
 class TestAuthFromRefreshToken(unittest.TestCase):
@@ -53,6 +88,18 @@ class TestAuthFromRefreshToken(unittest.TestCase):
         self.assertEqual(token.refresh_token,
                          '8eb667707535655f2d9e14fc6491a59f6e06f2e73170761259907d8de186b6a1')
 
+    @responses.activate
+    def test_token_invalid_authentication(self):
+        responses.add(responses.POST, host + "/auth/access_token",
+                      json={
+                          "message": "Invalid authentication"
+                      },
+                      status=403)
+        token, err = xee.get_token_from_refresh_token("fake_refresh_token")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'AUTHENTICATION_ERROR')
+        self.assertEqual(err.message, 'Invalid authentication')
+        self.assertEqual(err.tip, 'Check your Xee credentials')
 
 class TestUser(unittest.TestCase):
     @responses.activate
@@ -147,6 +194,26 @@ class TestCars(unittest.TestCase):
         self.assertListEqual(cars, expected)
 
     @responses.activate
+    def test_get_cars_scope_403(self):
+        responses.add(responses.GET, host + "/users/me/cars",
+                      json=
+                      [
+                          {
+                              'type': 'AUTHORIZATION_ERROR',
+                              'message': "Token does not have the required scope",
+                              'tip': "Add the cars_read scope to your app scopes and reconnect the user"
+                          }
+                      ],
+                      status=403)
+        cars, err = xee.get_cars("oops")
+        self.assertIsNone(cars)
+        self.assertEqual(err, APIException(
+            'AUTHORIZATION_ERROR',
+            "Token does not have the required scope",
+            "Add the cars_read scope to your app scopes and reconnect the user"))
+
+class TestCar(unittest.TestCase):
+    @responses.activate
     def test_get_car(self):
         # Mock https://github.com/xee-lab/xee-api-docs/blob/master/api/api/v3/cars/car_id.md
         responses.add(responses.GET, host + "/cars/1337",
@@ -174,8 +241,8 @@ class TestCars(unittest.TestCase):
         self.assertEqual(car.cardb_id, 210)
 
     @responses.activate
-    def test_get_cars_scope_403(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_scope_403(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
@@ -185,51 +252,50 @@ class TestCars(unittest.TestCase):
                           }
                       ],
                       status=403)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'AUTHORIZATION_ERROR',
             "Token does not have the required scope",
             "Add the cars_read scope to your app scopes and reconnect the user"))
 
     @responses.activate
-    def test_get_cars_access_403(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_token_403(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
                               'type': 'AUTHORIZATION_ERROR',
-                              'message': "Token can't access this user",
-                              'tip': "Make sure the trip belongs to the user you asked for"
+                              'message': "Token can't access this car",
+                              'tip': "Make sure the token belongs to the user owning the car you're asking for"
                           }
                       ],
                       status=403)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'AUTHORIZATION_ERROR',
-            "Token can't access this user",
-            "Make sure the trip belongs to the user you asked for"))
-
+            "Token can't access this car",
+            "Make sure the token belongs to the user owning the car you're asking for"))
+    
     @responses.activate
-    def test_get_cars_404(self):
-        responses.add(responses.GET, host + "/users/me/cars",
+    def test_get_car_404(self):
+        responses.add(responses.GET, host + "/cars/123",
                       json=
                       [
                           {
                               'type': 'PARAMETERS_ERROR',
-                              'message': "User not found",
-                              'tip': "Please check that the user exists, looks like it does not"
+                              'message': "Car not found",
+                              'tip': "Please check that the car exists, looks like it does not"
                           }
                       ],
                       status=404)
-        cars, err = xee.get_cars("oops")
-        self.assertIsNone(cars)
+        car, err = xee.get_car(123, "fake_access_token")
+        self.assertIsNone(car)
         self.assertEqual(err, APIException(
             'PARAMETERS_ERROR',
-            "User not found",
-            "Please check that the user exists, looks like it does not"))
-
+            "Car not found",
+            "Please check that the car exists, looks like it does not"))
 
 class TestStats(unittest.TestCase):
     @responses.activate
@@ -718,20 +784,3 @@ class TestCarCompat(unittest.TestCase):
         self.assertEqual(err.message, "CarDb not found")
         self.assertEqual(err.tip, "The carDb associated with KType doesn't exist. Please try with an other KType.")
 
-
-class TestErrors(unittest.TestCase):
-    @responses.activate
-    def test_400(self):
-        return
-
-    def test_401(self):
-        return
-
-    def test_403(self):
-        return
-
-    def test_404(self):
-        return
-
-    def test_416(self):
-        return
