@@ -148,7 +148,7 @@ def parse_token(token):
             token['expires_in'],
             token['expires_at']
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -191,7 +191,7 @@ def parse_user(user):
             user['role'],
             user['isLocationEnabled']
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -227,7 +227,7 @@ def parse_car(car):
             car['deviceId'],
             car['cardbId']
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -258,7 +258,7 @@ def parse_signal(signal):
             signal['value'],
             isodate.parse_datetime(signal['date'])
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -292,7 +292,7 @@ def parse_location(location):
             location['heading'],
             isodate.parse_datetime(location['date'])
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -335,7 +335,7 @@ def parse_status(status):
             accelerometer,
             [parse_signal(signal) for signal in status['signals']]
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -367,7 +367,7 @@ def parse_used_time(used_time):
             used_time['type'],
             used_time['value'],
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -399,7 +399,7 @@ def parse_mileage(mileage):
             mileage['type'],
             mileage['value'],
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -432,7 +432,7 @@ def parse_trip(trip):
             isodate.parse_datetime(trip['beginDate']),
             isodate.parse_datetime(trip['endDate'])
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 
@@ -462,7 +462,7 @@ def parse_trip_stat(trip_stat):
             trip_stat['type'],
             trip_stat['value']
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 def parse_availability(availability):
@@ -494,7 +494,7 @@ def parse_availability(availability):
              for signal_availability in available_signals_dict],
             [parse_signal_availability(signal_availability)
              for signal_availability in unavailable_signals_dict])
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)
 
 def parse_signal_availability(signal_availability):
@@ -523,5 +523,5 @@ def parse_signal_availability(signal_availability):
             signal_availability['name'],
             signal_availability['reliability']
         )
-    except ValueError as err:
+    except (ValueError, KeyError) as err:
         raise xee_exceptions.ParseException(err)

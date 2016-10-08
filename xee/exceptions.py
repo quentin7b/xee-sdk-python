@@ -9,7 +9,7 @@ class ParseException(Exception):
     """
 
     def __init__(self, parent):
-        super(ParseException, self).__init__(parent.message)
+        super(ParseException, self).__init__(parent)
 
 
 class APIException(Exception):
