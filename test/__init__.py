@@ -3,3 +3,4 @@
 """This package contains nothing !"""
 from test.test_sdk import *
 from test.test_entities import *
+from test.test_utils import *

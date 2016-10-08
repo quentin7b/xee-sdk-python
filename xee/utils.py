@@ -38,7 +38,7 @@ def do_bearer_get_request(route, bearer):
         return response
     else:
         first_error = response[0]
-        if request.status_code in [400, 401, 403, 404, 416, 500]:
+        if request.status_code in [400, 401, 403, 404, 416]:
             raise xee_exceptions.APIException(str(first_error['type']), str(first_error['message']),
                                               str(first_error['tip']))
         else:
@@ -77,7 +77,7 @@ def do_basic_get_request(route, client_id, client_secret):
         return response
     else:
         first_error = response[0]
-        if request.status_code in [400, 401, 403, 404, 416, 500]:
+        if request.status_code in [400, 401, 403, 404, 416]:
             raise xee_exceptions.APIException(str(first_error['type']), str(first_error['message']),
                                               str(first_error['tip']))
         else:
