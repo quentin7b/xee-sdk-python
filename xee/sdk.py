@@ -42,6 +42,7 @@ class Xee(object):
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.host = 'https://{env}.xee.com/v3'.format(env=env)
+        self.compat_host = 'https://compat.xee.com/v1'
 
     def get_authentication_url(self, state=None):
         """
@@ -133,7 +134,7 @@ class Xee(object):
         """
         route = '{host}/users/me'.format(host=self.host)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_user(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -156,7 +157,7 @@ class Xee(object):
         """
         route = '{host}/users/me/cars'.format(host=self.host)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return [xee_entities.parse_car(car) for car in response], None
         except ValueError:
             return [], None
@@ -183,7 +184,7 @@ class Xee(object):
         """
         route = '{host}/cars/{car_id}'.format(host=self.host, car_id=car_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_car(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -208,7 +209,7 @@ class Xee(object):
         """
         route = '{host}/cars/{car_id}/status'.format(host=self.host, car_id=car_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_status(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -262,7 +263,7 @@ class Xee(object):
         if bool(params):
             route = '?'.join([route, url_parser.urlencode(params)])
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return [xee_entities.parse_signal(signal) for signal in response], None
         except ValueError:
             # Happens when the signals list is empty
@@ -308,7 +309,7 @@ class Xee(object):
         if bool(params):
             route = '?'.join([route, url_parser.urlencode(params)])
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return [xee_entities.parse_location(location) for location in response], None
         except ValueError:
             # Happens when the locations list is empty
@@ -349,7 +350,7 @@ class Xee(object):
         if bool(params):
             route = '?'.join([route, url_parser.urlencode(params)])
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return [xee_entities.parse_trip(trip) for trip in response], None
         except ValueError:
             # Happens when the trips list is empty
@@ -395,7 +396,7 @@ class Xee(object):
         if bool(params):
             route = '?'.join([route, url_parser.urlencode(params)])
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_used_time(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -438,7 +439,7 @@ class Xee(object):
         if bool(params):
             route = '?'.join([route, url_parser.urlencode(params)])
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_mileage(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -463,7 +464,7 @@ class Xee(object):
         """
         route = '{host}/trips/{trip_id}'.format(host=self.host, trip_id=trip_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             return xee_entities.parse_trip(response), None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err
@@ -497,7 +498,7 @@ class Xee(object):
         if bool(params):
             route = '{route}?{params}'.format(route=route, params=url_parser.urlencode(params))
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             signals = [xee_entities.parse_signal(signal) for signal in response]
             return signals, None
         except ValueError:
@@ -526,7 +527,7 @@ class Xee(object):
         """
         route = '{host}/trips/{trip_id}/locations'.format(host=self.host, trip_id=trip_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             locations = [xee_entities.parse_location(location) for location in response]
             return locations, None
         except ValueError:
@@ -555,7 +556,7 @@ class Xee(object):
         """
         route = '{host}/trips/{trip_id}/stats'.format(host=self.host, trip_id=trip_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             stats = [xee_entities.parse_trip_stat(stat) for stat in response]
             return stats, None
         except ValueError:
@@ -584,7 +585,7 @@ class Xee(object):
         """
         route = '{host}/trips/{trip_id}/stats/mileage'.format(host=self.host, trip_id=trip_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             mileage = xee_entities.parse_trip_stat(response)
             return mileage, None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
@@ -610,8 +611,32 @@ class Xee(object):
         """
         route = '{host}/trips/{trip_id}/stats/usedtime'.format(host=self.host, trip_id=trip_id)
         try:
-            response = xee_utils.do_get_request(route, access_token)
+            response = xee_utils.do_bearer_get_request(route, access_token)
             used_time = xee_entities.parse_trip_stat(response)
             return used_time, None
+        except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
+            return None, err
+
+    def get_car_compat(self, cardb_id):
+        """
+        Retrieve car signals availability
+
+        Parameters
+        ----------
+        cardb_id        :   str
+                            the cardb_id of car you want to know the signals availability.
+
+        Returns
+        -------
+        tuple
+            A tuple containing Compat, Error.
+            The error is None if everything went fine.
+
+        """
+        route = '{host}/cardb/{cardb_id}'.format(host=self.compat_host, cardb_id=cardb_id)
+        try:
+            response = xee_utils.do_basic_get_request(route, self.client_id, self.client_secret)
+            availability = xee_entities.parse_availability(response)
+            return availability, None
         except (xee_exceptions.APIException, xee_exceptions.ParseException) as err:
             return None, err

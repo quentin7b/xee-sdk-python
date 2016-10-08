@@ -11,6 +11,7 @@ from datetime import datetime
 
 xee = Xee('toto', 'tata', 'tut')
 host = xee.host
+compat_host = xee.compat_host
 
 
 class TestAuthFromAuthorizationCode(unittest.TestCase):
@@ -639,6 +640,83 @@ class TestTripDuration(unittest.TestCase):
         self.assertEqual(err.type, 'PARAMETERS_ERROR')
         self.assertEqual(err.message, "Trip not found")
         self.assertEqual(err.tip, "Please check that the trip exists, looks like it does not")
+
+
+class TestCarCompat(unittest.TestCase):
+    @responses.activate
+    def test_get_compat(self):
+        # Mock https://github.com/xee-lab/xee-api-docs/blob/master/api/compat/v1/cardb/cardbId.md
+        responses.add(responses.GET, compat_host + "/cardb/123",
+                      json={
+                            "signalsAvailable": 
+                            [
+                                {
+                                    "name": "Odometer",
+                                    "reliability": None
+                                },
+                                {
+                                    "name": "FuelLevel",
+                                    "reliability": "incremental"
+                                }
+                            ],
+                            "signalsUnavailable": 
+                            [
+                                {
+                                    "name": "VehiculeSpeed",
+                                    "reliability": None
+                                },
+                                {
+                                    "name": "EngineSpeed",
+                                    "reliability": None
+                                }
+                            ]
+                        },
+                      status=200)
+        compat, err = xee.get_car_compat("123")
+        self.assertEqual(len(compat.available), 2)
+        self.assertEqual(compat.available[0].name, 'Odometer')
+        self.assertEqual(compat.available[0].reliability, None)
+        self.assertEqual(compat.available[1].name, 'FuelLevel')
+        self.assertEqual(compat.available[1].reliability, 'incremental')
+        self.assertEqual(len(compat.unavailable), 2)
+        self.assertEqual(compat.unavailable[0].name, 'VehiculeSpeed')
+        self.assertEqual(compat.unavailable[0].reliability, None)
+        self.assertEqual(compat.unavailable[1].name, 'EngineSpeed')
+        self.assertEqual(compat.unavailable[1].reliability, None)
+
+    @responses.activate
+    def test_cardb_not_correct(self):
+        responses.add(responses.GET, compat_host + "/cardb/123",
+                      json=[
+                          {
+                              "type": "PARAMETERS_ERROR",
+                              "message": "Unable to parse cardb parameter",
+                              "tip": "Please check if carDb parameter you have set is a int"
+                          }
+                      ],
+                      status=400)
+        compat, err = xee.get_car_compat("123")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'PARAMETERS_ERROR')
+        self.assertEqual(err.message, "Unable to parse cardb parameter")
+        self.assertEqual(err.tip, "Please check if carDb parameter you have set is a int")
+
+    @responses.activate
+    def test_cardb_not_found(self):
+        responses.add(responses.GET, compat_host + "/cardb/123",
+                      json=[
+                          {
+                              "type": "NOT_FOUND",
+                              "message": "CarDb not found",
+                              "tip": "The carDb associated with KType doesn't exist. Please try with an other KType."
+                          }
+                      ],
+                      status=404)
+        compat, err = xee.get_car_compat("123")
+        self.assertIsNotNone(err)
+        self.assertEqual(err.type, 'NOT_FOUND')
+        self.assertEqual(err.message, "CarDb not found")
+        self.assertEqual(err.tip, "The carDb associated with KType doesn't exist. Please try with an other KType.")
 
 
 class TestErrors(unittest.TestCase):

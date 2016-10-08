@@ -105,7 +105,18 @@ TripStat = collections.namedtuple(
         'type',
         'value'
     ])
-
+SignalsAvailability = collections.namedtuple(
+    'SignalsAvailability',
+    [
+        'available',
+        'unavailable'
+    ])
+SignalAvailability = collections.namedtuple(
+    'SignalAvailability',
+    [
+        'name',
+        'reliability'
+    ])
 
 # Parsers
 
@@ -450,6 +461,67 @@ def parse_trip_stat(trip_stat):
         return TripStat(
             trip_stat['type'],
             trip_stat['value']
+        )
+    except ValueError as err:
+        raise xee_exceptions.ParseException(err)
+
+def parse_availability(availability):
+    """
+    Parse an availability from a a dict representation.
+
+    Parameters
+    ----------
+    availability  : dict
+                    The availability as a dict.
+
+    Returns
+    -------
+    tuple
+        A namedtuple containing availability info.
+        The error is None if everything went fine.
+
+    Raises
+    ------
+    ValueError
+        If the dict does not contains the correct data.
+
+    """
+    try:
+        available_signals_dict = availability['signalsAvailable']
+        unavailable_signals_dict = availability['signalsUnavailable']
+        return SignalsAvailability(
+            [parse_signal_availability(signal_availability)
+             for signal_availability in available_signals_dict],
+            [parse_signal_availability(signal_availability)
+             for signal_availability in unavailable_signals_dict])
+    except ValueError as err:
+        raise xee_exceptions.ParseException(err)
+
+def parse_signal_availability(signal_availability):
+    """
+    Parse a signal availability from a a dict representation.
+
+    Parameters
+    ----------
+    availability  : dict
+                    The signal availability as a dict.
+
+    Returns
+    -------
+    tuple
+        A namedtuple containing signal availability info.
+        The error is None if everything went fine.
+
+    Raises
+    ------
+    ValueError
+        If the dict does not contains the correct data.
+
+    """
+    try:
+        return SignalAvailability(
+            signal_availability['name'],
+            signal_availability['reliability']
         )
     except ValueError as err:
         raise xee_exceptions.ParseException(err)
