@@ -1,3 +1,13 @@
+# Deprecated
+
+As I can't find time to work on this project anymore, but the Xee API continues to move forward, this project is now deprecated.
+By chance, you can find an up-to-date project on the fork [tikismoke](https://github.com/tikismoke) made.
+
+Please reach [this repository for up-to-date sdk](https://github.com/tikismoke/xee-sdk-python)
+
+---
+
+
 #  Xee SDK Python
 
 [![Build Status](https://travis-ci.org/quentin7b/xee-sdk-python.svg?branch=master)](https://travis-ci.org/quentin7b/xee-sdk-python)
